@@ -8,7 +8,7 @@ import { Food } from '../shared/models/Food';
   providedIn: 'root'
 })
 export class CartService {
-  private cart:Cart=new Cart;
+  private cart:Cart=this.getCartLocalStorage();
   private cartSubject:BehaviorSubject<Cart>=new BehaviorSubject(this.cart);
   constructor() { }
 
@@ -17,10 +17,12 @@ export class CartService {
     if(cartItem)
     return;
     this.cart.Items.push(new CartItem(food));
+    this.setCartLocalStorage();
     }
   
   removeFromCart(foodId:string):void{
     this.cart.Items=this.cart.Items.filter(item=>item.food.id!=foodId);
+    this.setCartLocalStorage();
   }  
 
   changeQuantity(foodId:string,quantitiy:number){
@@ -28,13 +30,28 @@ export class CartService {
     if (!cartItem) return;
     cartItem.quantitiy=quantitiy;
     cartItem.price=quantitiy*cartItem.food.price;
+    this.setCartLocalStorage();
   }
 
   clearCart(){
     this.cart=new Cart;
+    this.setCartLocalStorage();
   }
 
   getCartObservable():Observable<Cart>{
     return this.cartSubject.asObservable();
+  }
+
+  private setCartLocalStorage():void{
+    this.cart.totalPrice=this.cart.Items.reduce((prevSum,currentItem)=>prevSum+currentItem.price,0);
+    this.cart.totalCount=this.cart.Items.reduce((prevSum,currentItem)=>prevSum+currentItem.price,0);
+    const cartJson=JSON.stringify(this.cart);
+    localStorage.setItem('cart',cartJson);
+    this.cartSubject.next(this.cart);
+  }
+
+  private getCartLocalStorage():Cart{
+    const cartJson=localStorage.getItem('Cart');
+    return cartJson? JSON.parse(cartJson):new Cart();
   }
 }
