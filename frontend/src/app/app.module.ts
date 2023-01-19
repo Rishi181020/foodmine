@@ -12,7 +12,8 @@ import { RatingModule } from 'ng-starrating';
   declarations: [
     AppComponent,
     HeaderComponent,
-    HomeComponent
+    HomeComponent,
+   
   ],
   imports: [
     BrowserModule,
